@@ -189,7 +189,7 @@ async def generate_shopping_list(customer_code: str):
 
     response = await generate_gpt3(prompt)
     
-    return {"customer_code": customer_code, "response": response}
+    return {"customer_code": customer_code, "response": json.loads(response)}
 
 @router.get("/promotion_generation/{customer_code}")
 async def generate_promotion(customer_code: str):
