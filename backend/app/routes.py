@@ -10,6 +10,12 @@ from .client import fetch_data
 from app.services.classification import create_classification_prompt, create_shopping_list_prompt
 from app.services.lmModel import generate_gpt3
 
+from app.services.classification import create_classification_prompt
+from app.services.lmModel import classify_with_gpt3
+from app.services.prompts import fav_and_least_fav_product_type_promotional_text_template, highest_and_lowest_volume_product_type_promotional_text_template
+from app.services.lmModel import simple_rag, simple_rag_query
+import datetime
+
 router = APIRouter()
 
 @router.get("/max_sales_week/{customer_code}")

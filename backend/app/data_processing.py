@@ -177,3 +177,43 @@ def get_top_department(sales_data, key='sales_data'):
         raise ValueError(f"Key error in sales data processing: {str(e)}")
     except ValueError as e:
         raise ValueError(f"Value error in sales data processing: {str(e)}")
+
+def get_customer_info_fav_and_leastfav_info(customer_info_csv_path: str, customer_code: str):
+    df = pd.read_csv(customer_info_csv_path)
+
+    customer_df = df[df['customer_code'] == customer_code]
+
+    customer_df['total_sales_quantity_breakdown'] = customer_df['total_sales_quantity_breakdown'].str.rstrip('%').astype(float)
+
+    favorite_product_type = customer_df.loc[customer_df['total_sales_quantity_breakdown'].idxmax()]['level_1']
+
+    least_favorite_product_type = customer_df.loc[customer_df['total_sales_quantity_breakdown'].idxmin()]['level_1']
+
+    result = {
+        'Favourite product type': favorite_product_type,
+        'Least Favourite product type': least_favorite_product_type
+    }
+    
+    return result
+
+
+def get_customer_info_highV_and_lowV_info(highV_df: str, lowV_df: str, customer_code: str, month:int):
+    highV_df = pd.read_csv(highV_df)
+    lowV_df = pd.read_csv(lowV_df)
+
+    highV_filtered = highV_df[(highV_df['customer_code'] == customer_code) & (highV_df['month'] == month)]
+    lowV_filtered = lowV_df[(lowV_df['customer_code'] == customer_code) & (lowV_df['month'] == month)]
+    
+    # Get the highest volume product type
+    highest_volume_product = highV_filtered.loc[highV_filtered['volume'].idxmax()]['department_item_category']
+    
+    # Get the lowest volume product type
+    lowest_volume_product = lowV_filtered.loc[lowV_filtered['volume'].idxmin()]['department_item_category']
+    
+    # Create the JSON output
+    customer_info = {
+        "Highest volume product type": highest_volume_product,
+        "Lowest volume product type": lowest_volume_product
+    }
+    
+    return customer_info
