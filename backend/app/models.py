@@ -1,6 +1,6 @@
 # app/models.py
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Dict, List
 
 class CustomerSalesDetail(BaseModel):
@@ -41,3 +41,12 @@ class CustomerItemNameDetail(BaseModel):
 class CustomerItemNameResponse(BaseModel):
     customer_code: str
     item_name: List[CustomerItemNameDetail]
+
+
+class SalesDataRequest(BaseModel):
+    sales_data: Dict
+    key: str = Field(default='item_name', description="Key to access the list of items in the sales data.")
+
+class Product(BaseModel):
+    level_1: str
+    total_sales_quantity_breakdown: float

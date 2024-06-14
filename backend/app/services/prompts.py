@@ -7,3 +7,4 @@ def create_classification_prompt(customer_code, max_sales_weeks):
     question = "\nClassify this customer into one of the following categories: Begin-Month Promotion, Mid-Month Promotion, End-Month Promotion. What is the best category?"
     
     return f"{intro}\n{data_summary}\n{question}"
+
