@@ -8,7 +8,6 @@ def create_classification_prompt(customer_code, max_sales_weeks):
     
     return f"{intro}\n{data_summary}\n{question}"
 
-
 def fav_and_least_fav_product_type_promotional_text_template():
     template = """You are an Expert in writing promotional text and offer texts personalized for a given user. 
     you are given some information about the customer and you have to write a promotional text for a product of the favourite product type and a product of the least favourite product type to boost their sales.

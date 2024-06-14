@@ -20,7 +20,7 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 client = openai.OpenAI()
 llm = ChatOpenAI(api_key=openai.api_key, temperature=0.90, model_kwargs={"top_p": 0.9})
 
-async def classify_with_gpt3(prompt: str):
+async def generate_gpt3(prompt: str):
     try:
         # Asynchronously call the OpenAI API if the SDK supports it. For now, it's a regular call.
         response = client.chat.completions.create(

@@ -97,6 +97,87 @@ def get_total_sales_quantity_breakdown_by_item_name(agg_df):
 
     result_df.to_csv(TOTAL_SALES_Q_BY_ITEM_NAME_PATH,index=False)
 
+def get_top_products(sales_data, key='item_name'):
+    try:
+        # print(sales_data)
+        # Extract items and filter out 'N/A'
+        filtered_items = [
+            item for item in sales_data[key]
+            if item['total_sales_quantity_breakdown'] != 'N/A'
+        ]
+        # print(filtered_items)
+        # Convert percentage strings to floats and sort by this value
+        for item in filtered_items:
+            item['total_sales_quantity_breakdown'] = float(item['total_sales_quantity_breakdown'].rstrip('%'))
+
+        # Sort items based on sales percentage in descending order
+        top_items = sorted(
+            filtered_items, 
+            key=lambda x: x['total_sales_quantity_breakdown'], 
+            reverse=True
+        )
+
+        # Return top 5 items
+        return top_items[:5]
+    except KeyError as e:
+        raise ValueError(f"Key error in sales data processing: {str(e)}")
+    except ValueError as e:
+        raise ValueError(f"Value error in sales data processing: {str(e)}")
+
+def get_top_category(sales_data, key='item_name'):
+    try:
+        # print(sales_data)
+        # Extract items and filter out 'N/A'
+        filtered_items = [
+            item for item in sales_data[key]
+            if item['total_sales_quantity_breakdown'] != 'N/A'
+        ]
+        # print(filtered_items)
+        # Convert percentage strings to floats and sort by this value
+        for item in filtered_items:
+            item['total_sales_quantity_breakdown'] = float(item['total_sales_quantity_breakdown'].rstrip('%'))
+
+        # Sort items based on sales percentage in descending order
+        top_items = sorted(
+            filtered_items, 
+            key=lambda x: x['total_sales_quantity_breakdown'], 
+            reverse=True
+        )
+
+        # Return top 5 items
+        return top_items[:3]
+    except KeyError as e:
+        raise ValueError(f"Key error in sales data processing: {str(e)}")
+    except ValueError as e:
+        raise ValueError(f"Value error in sales data processing: {str(e)}")
+
+def get_top_department(sales_data, key='sales_data'):
+    try:
+        # print(sales_data)
+        # Extract items and filter out 'N/A'
+        filtered_items = [
+            item for item in sales_data[key]
+            if item['total_sales_quantity_breakdown'] != 'N/A'
+        ]
+        # print(filtered_items)
+        # Convert percentage strings to floats and sort by this value
+        for item in filtered_items:
+            item['total_sales_quantity_breakdown'] = float(item['total_sales_quantity_breakdown'].rstrip('%'))
+
+        # Sort items based on sales percentage in descending order
+        top_items = sorted(
+            filtered_items, 
+            key=lambda x: x['total_sales_quantity_breakdown'], 
+            reverse=True
+        )
+
+        # Return top 5 items
+        return top_items[:3]
+    except KeyError as e:
+        raise ValueError(f"Key error in sales data processing: {str(e)}")
+    except ValueError as e:
+        raise ValueError(f"Value error in sales data processing: {str(e)}")
+
 def get_customer_info_fav_and_leastfav_info(customer_info_csv_path: str, customer_code: str):
     df = pd.read_csv(customer_info_csv_path)
 
