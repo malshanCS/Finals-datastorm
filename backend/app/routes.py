@@ -9,6 +9,10 @@ from .models import *
 from .client import fetch_data
 from app.services.classification import create_classification_prompt
 from app.services.lmModel import classify_with_gpt3
+from app.services.prompts import fav_and_least_fav_product_type_promotional_text_template, highest_and_lowest_volume_product_type_promotional_text_template
+from app.services.lmModel import simple_rag, simple_rag_query
+import datetime
+
 
 router = APIRouter()
 
@@ -112,3 +116,6 @@ async def classify_promotion(customer_code: str):
     classification = await classify_with_gpt3(prompt)
     
     return {"customer_code": customer_code, "classification": classification}
+
+async def get_promotional_data(customer_code: str, month: datetime.datetime.now().month)
+    print("request received")
