@@ -2,9 +2,11 @@ fastapi
 uvicorn
 openai
 pandas
+numpy
 httpx
 python-dotenv
 langchain
+<<<<<<< HEAD
 langchain-cohere
 langchain-community
 langchain-core
@@ -15,3 +17,8 @@ pyarrow
 PyMuPDF
 pypdf
 faiss-cpu
+=======
+transformers
+faiss-cpu
+pymupdf
+>>>>>>> 73341a9 (conflict resolve)
