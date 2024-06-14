@@ -6,6 +6,9 @@ import os
 from .config import *
 from .data_processing import *
 from .models import *
+from .client import fetch_data
+from app.services.classification import create_classification_prompt
+from app.services.lmModel import classify_with_gpt3
 
 router = APIRouter()
 
@@ -88,3 +91,24 @@ async def get_sales_data(customer_code: str):
     item_name = [CustomerItemNameDetail(**row) for index, row in customer_data.iterrows()]
     
     return CustomerItemNameResponse(customer_code=customer_code, item_name=item_name)
+
+
+
+@router.get("/classify_promotion/{customer_code}")
+async def classify_promotion(customer_code: str):
+    print("request received")
+    url = f"{BASE_URL}/max_sales_week/{customer_code}"
+    
+
+    response = await fetch_data(url)
+    print("data fetched")
+    print(response)
+    if response.status_code != 200:
+        raise HTTPException(status_code=404, detail="Customer data not found")
+    
+    prompt = create_classification_prompt(customer_code, response.json()['max_sales_weeks'])
+    print("classifiction prompt")
+    print(prompt)
+    classification = await classify_with_gpt3(prompt)
+    
+    return {"customer_code": customer_code, "classification": classification}
