@@ -1,5 +1,5 @@
 # app/routes.py
-
+import json
 from fastapi import APIRouter, HTTPException
 import pandas as pd
 import os
@@ -7,14 +7,18 @@ from .config import *
 from .data_processing import *
 from .models import *
 from .client import fetch_data
-from app.services.classification import create_classification_prompt, create_shopping_list_prompt
-from app.services.lmModel import generate_gpt3
+from .services.classification import create_classification_prompt, create_shopping_list_prompt
+from .services.lmModel import generate_gpt3
+from langchain.prompts import ChatPromptTemplate
 
-from app.services.classification import create_classification_prompt
-from app.services.lmModel import classify_with_gpt3
-from app.services.prompts import fav_and_least_fav_product_type_promotional_text_template, highest_and_lowest_volume_product_type_promotional_text_template
-from app.services.lmModel import simple_rag, simple_rag_query
+from .services.classification import create_classification_prompt
+# from .services.lmModel import classify_with_gpt3
+from .services.prompts import fav_and_least_fav_product_type_promotional_text_template, highest_and_lowest_volume_product_type_promotional_text_template
+from .services.lmModel import simple_rag, simple_rag_query
 import datetime
+
+from .services.lmModel import simple_rag, simple_rag_query
+from .services.prompts import *
 
 router = APIRouter()
 
@@ -186,3 +190,133 @@ async def generate_shopping_list(customer_code: str):
     response = await generate_gpt3(prompt)
     
     return {"customer_code": customer_code, "response": response}
+
+@router.get("/promotion_generation/{customer_code}")
+async def generate_promotion(customer_code: str):
+    template = """You are an Expert in writing promotional text and offer texts personalized for a given user. 
+    you are given some information about the customer and you have to write a promotional text for a product of the favourite product type and a product of the least favourite product type to boost their sales.
+    Refer to the offer_context for most common product of each type. Also you can create similar product for a given type. ALWAYS PROVIDE A PRODUCT NAME IN THE PROMOTIONAL TEXT. 
+    Here are the information all time favourite product categories of the customer:
+    {customer_info}: 
+    input format for customer_info= "{{Favourite product type: {{product_type}}, Least Favourite product type: {{product_type}},}}"
+    }}"
+
+    Influence by below sample offers for different product categories to create example promotional text based on the product types, be creative and use more words:
+    {offer_context}
+
+    based on above information provide the promotional text for the favourite product type and least favourite product type.
+
+    Final JSON output format= 
+    "{{Favourite product type: GENERATED PROMOTIONAL TEXT FOR FAVOURITE PRODUCT TYPE,
+    Least Favourite product type: GENERATED PROMOTIONAL TEXT FOR LEAST FAVOURITE PRODUCT TYPE,}}"
+
+    No need opening or ending paragraph, provide the JSON file ONLY.
+
+    """
+
+    template_2 = """You are an Expert in writing promotional text and offer texts personalized for a given user. 
+    You are given some information about the customer's transaction history and you have to write a promotional text for a product of the highest volume sales product type and a product of the lowest volume sales product type to boost their sales.
+    Refer to the offer_context for the most common product of each type. You can also create similar products for a given type. ALWAYS PROVIDE A PRODUCT NAME IN THE PROMOTIONAL TEXT. 
+    Here is the information about the customer's transaction history: EXTREMELY IMPORTANT TO GENERATE PROMOTIONAL TEXT EMPHASIZING THE BULK BEHAVIOR OF THE CUSTOMER
+    {customer_info}: 
+    input format for customer_info= "{{Highest volume product type: {{product_type}}, Lowest volume product type: {{product_type}},}}"
+    }}"
+
+    Influence by the below sample offers for different product categories to create example promotional text based on the product types, be creative and use more words:
+    {offer_context}
+
+    Based on the above information, provide the promotional text for the highest volume product type and the lowest volume product type.
+
+    Final JSON output format= 
+    "{{Highest volume product type: GENERATED PROMOTIONAL TEXT FOR HIGHEST VOLUME PRODUCT TYPE,
+    Lowest volume product type: GENERATED PROMOTIONAL TEXT FOR LOWEST VOLUME PRODUCT TYPE,}}"
+
+    No need for an opening or ending paragraph, provide the JSON file ONLY.
+    """
+
+    template = ChatPromptTemplate.from_template(template)
+    template_2 = ChatPromptTemplate.from_template(template_2)
+
+    result = str(get_customer_info_fav_and_leastfav_info("../database/total_sales_quantity_breakdown_by_department_item_category_df.csv", customer_code))
+    customer_info = str(get_customer_info_highV_and_lowV_info("../database/top3_department_item_category.csv", "../database/bottom3_department_item_category.csv", customer_code))
+
+    # vector_store_path = await simple_rag(VECTOR_STORE_PATH, SOURCE_PATH)
+    response_01 = await simple_rag_query(VECTOR_STORE_PATH, template, result)
+    response_02 = await simple_rag_query(VECTOR_STORE_PATH, template_2, customer_info)
+
+    
+    return {"customer_code": customer_code, "response_01": json.loads(response_01), "response_02": json.loads(response_02)}
+
+
+@router.get("/recommendation_generation/{customer_code}")
+async def generate_recommendation(customer_code: str):
+    template = """You are an Expert in recommending products personalized for a given user. 
+    you are given some information about the product categories of frequently bought products and the percentages of transactions counts happend per each category
+    out of all the transactions done by each customer.
+    Here are the information of top 3 favourite product categories of the customer:
+    {customer_info}: 
+    input format for customer_info= "{{Favourite product categories: {{product_type1}},{{product_type2}},{{product_type3}}}}"
+
+    give ATLEAST 5 products relevent to the above favourite product categories of the customer solely based on the following:
+    {offer_context}
+
+
+    Final JSON output format= 
+    "{{ product name1:Product Discription1,
+    product name2:Product Discription2, 
+    product name3:Product Discription3,
+    ...}}"
+
+    Example Output=
+    "Green Apple: Crisp and tart, green apples are perfect for snacking, baking, or adding a refreshing crunch to salads. Rich in fiber and vitamin C."
+
+    No need opening or ending paragraph, provide the JSON file ONLY.
+
+    """
+
+    template_2 = """You are an Expert in recommending products personalized for a given user. You are provided with the information on
+    products that a user bought with it's discription.Your task is to creatively generate some complementary products related to the products in the input
+    and output them with a creatively generated product discription.
+
+    here is the information on products bought by user:
+    {customer_info}
+
+    input format for product_info = "
+    {{
+    product name1:product discription1
+    product name2:product discription2
+    product name3:product discription3}}"
+
+    generate some complementary products for the above provided products and generate product discriptions for those products influenced by the following:
+    {offer_context}
+
+    Final JSON output format= 
+    "
+    product name1:product discription1
+    product name2:product discriptio2
+    product name3:product discription3
+    product name4:product discription4
+    product name5:product discription5
+    product name6:product discription6
+    product name7:product discription7
+    "
+    the output should not contain any product that was already in the input
+
+    No need opening or ending paragraph, provide the JSON file ONLY.
+
+    """
+
+    template = ChatPromptTemplate.from_template(template)
+    template_2 = ChatPromptTemplate.from_template(template_2)
+
+    result = str(get_product_category(customer_code, "/Users/vihidun/Desktop/Finals_Datastorm_5/Finals-datastorm/database/frequet_items.csv"))
+    # customer_info = str(get_customer_info_highV_and_lowV_info("../database/top3_department_item_category.csv", "../database/bottom3_department_item_category.csv", customer_code))
+
+    # vector_store_path = await simple_rag(VECTOR_STORE_PATH_RECOMMEND, SOURCE_PATH_RECOMMEND)
+    response_01 = await simple_rag_query(VECTOR_STORE_PATH_RECOMMEND, template, result)
+    response_02 = await simple_rag_query(VECTOR_STORE_PATH_RECOMMEND, template_2, str(response_01))
+  
+    
+    return {"customer_code": customer_code, "response_01": json.loads(response_01),"response_02": json.loads(response_02)}
+
+

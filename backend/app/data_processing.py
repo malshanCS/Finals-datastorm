@@ -197,7 +197,9 @@ def get_customer_info_fav_and_leastfav_info(customer_info_csv_path: str, custome
     return result
 
 
-def get_customer_info_highV_and_lowV_info(highV_df: str, lowV_df: str, customer_code: str, month:int):
+def get_customer_info_highV_and_lowV_info(highV_df: str, lowV_df: str, customer_code: str):
+    month = 6
+
     highV_df = pd.read_csv(highV_df)
     lowV_df = pd.read_csv(lowV_df)
 
@@ -217,4 +219,15 @@ def get_customer_info_highV_and_lowV_info(highV_df: str, lowV_df: str, customer_
     }
     
     return customer_info
+
+
+def get_product_category(customer_code: str, csv_path: str):
+    df = pd.read_csv(csv_path)
+    customer_df = df[df["customer_code"]==customer_code]
+    top_3_records = customer_df.nlargest(3, 'transaction_percentage')
+    department_item_category_string = top_3_records['department_item_category'].str.cat(sep=', ')
+    result = "Favourite product categories: "+department_item_category_string
+
+
+    return result
     

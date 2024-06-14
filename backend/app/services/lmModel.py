@@ -2,7 +2,7 @@ import openai
 import os
 from dotenv import load_dotenv
 from langchain.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
+# from langchain_openai import ChatOpenAI
 
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_text_splitters import CharacterTextSplitter
@@ -11,6 +11,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFDirectoryLoader
 from langchain_core.runnables import RunnablePassthrough
+from langchain_community.chat_models import ChatOpenAI
 
 # Load environment variables from .env file
 load_dotenv()
@@ -57,19 +58,19 @@ async def simple_rag(vectorstore_path:str, source_path: str):
 
     return vectorstore_path
 
-async def simple_rag_query(vectorstore_path:str, query: str, prompt_template: ChatPromptTemplate,inputs: str):
-    vector_store = FAISS.load_local(vectorstore_path)
+async def simple_rag_query(vectorstore_path:str, prompt_template: ChatPromptTemplate,inputs: str):
+    vector_store = FAISS.load_local(vectorstore_path, embeddings=HuggingFaceBgeEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2"), allow_dangerous_deserialization=True )
 
     retriever = vector_store.as_retriever()
 
     rag_chain = (
-        {'customer_info': RunnablePassthrough(), 'offer_context': retriever}
+        {'offer_context': retriever, 'customer_info': RunnablePassthrough()} 
         | prompt_template
         | llm
         | StrOutputParser()
     )
 
-    response = rag_chain.invoke(inputs)
+    response = rag_chain.invoke(str(inputs))
 
     return response
 

@@ -17,5 +17,6 @@ PyMuPDF
 pypdf
 faiss-cpu
 transformers
-
-
+tiktoken
+sentence_transformers
+pypdf

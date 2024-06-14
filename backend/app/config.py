@@ -10,6 +10,9 @@ TOTAL_SALES_Q_BY_DEPT_ITEM_CAT_PATH = '../database/total_sales_quantity_breakdow
 TOTAL_SALES_Q_BY_ITEM_CAT_PATH = "../database/total_sales_quantity_breakdown_by_item_category_df.csv"
 TOTAL_SALES_Q_BY_ITEM_NAME_PATH = "../database/total_sales_quantity_breakdown_by_item_name_df.csv"
 
-
+VECTOR_STORE_PATH = "../database/vectordb"
+VECTOR_STORE_PATH_RECOMMEND = "../database/vectordbrec"
+SOURCE_PATH = '../promotional_texts'
+SOURCE_PATH_RECOMMEND = "../recommendation_pdf"
 
 BASE_URL = "http://localhost:8000"
