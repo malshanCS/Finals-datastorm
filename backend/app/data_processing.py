@@ -217,3 +217,4 @@ def get_customer_info_highV_and_lowV_info(highV_df: str, lowV_df: str, customer_
     }
     
     return customer_info
+    
