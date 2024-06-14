@@ -4,3 +4,14 @@ openai
 pandas
 httpx
 python-dotenv
+langchain
+langchain-cohere
+langchain-community
+langchain-core
+langchain-huggingface
+langchain-openai
+langchain-text-splitters
+pyarrow
+PyMuPDF
+pypdf
+faiss-cpu
